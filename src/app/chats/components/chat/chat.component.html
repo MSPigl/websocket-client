@@ -1,0 +1,22 @@
+<div>
+  <div>
+    <input [(ngModel)]="currentUser" [disabled]="isConnected$ | async"
+           type="text" id="from" placeholder="Choose a nickname"
+    />
+  </div>
+  <br />
+  <div>
+    <button id="connect" (click)="connect()" [disabled]="isConnected$ | async">Connect</button>
+    <button id="disconnect" (click)="disconnect()" [disabled]="!(isConnected$ | async)">
+      Disconnect
+    </button>
+  </div>
+  <br />
+  <div id="conversationDiv" *ngIf="isConnected$ | async">
+    <input [(ngModel)]="messageText" type="text" id="text" placeholder="Write a message..."/>
+    <button id="sendMessage" (click)="sendMessage()" [disabled]="!messageText?.length">Send</button>
+    <p *ngFor="let message of messages$ | async">
+      {{message.from}} said: {{message.text}} ({{message.time}})
+    </p>
+  </div>
+</div>
