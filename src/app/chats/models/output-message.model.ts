@@ -1,5 +1,5 @@
 import {Message} from './message.model';
 
 export interface OutputMessage extends Message {
-  time: string;
+  time: number;
 }
