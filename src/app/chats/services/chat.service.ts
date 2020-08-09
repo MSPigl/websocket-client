@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {OutputMessage} from '../models/output-message.model';
-import {Message} from '../models/message.model';
+import {ChatMessage} from '../models/chat-message.model';
 import {webSocket} from 'rxjs/webSocket';
+import {Message} from '../models/message.model';
+
+enum MessageType {
+  CONNECTION = 'connection',
+  CHAT_MESSAGE = 'chat-message',
+  TYPING_INDICATOR = 'typing-indicator'
+}
 
 @Injectable({
   providedIn: 'root'
@@ -25,22 +32,28 @@ export class ChatService {
 
   constructor() { }
 
-  sendMessage(message: Message): void {
-    this._connection.next(message);
+  sendChatMessage(message: ChatMessage): void {
+    this.sendMessage('chat-message', message);
+  }
+
+  private sendMessage(messageType: string, payload: any): void {
+    this._connection.next({
+      messageType,
+      payload
+    });
   }
 
   connect(): void {
     this._connection.subscribe(
       message => {
-        const messageType = (message as any).messageType;
-        const data = (message as any).data;
+        const receivedMessage: Message = message as Message;
 
-        if (!!messageType && !!data) {
-          if (messageType === 'connection') {
-            this._messages.next(data);
-          } else if (messageType === 'message') {
+        if (!!receivedMessage.messageType && !!receivedMessage.payload) {
+          if (receivedMessage.messageType === MessageType.CONNECTION) {
+            this._messages.next(receivedMessage.payload);
+          } else if (receivedMessage.messageType === MessageType.CHAT_MESSAGE) {
             const messages = this._messages.getValue();
-            messages.push(data);
+            messages.push(receivedMessage.payload);
             this._messages.next(messages.sort((a, b) => a.time < b.time ? -1 : 1));
           }
         }

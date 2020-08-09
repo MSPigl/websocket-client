@@ -1,5 +1,5 @@
-import {Message} from './message.model';
+import {ChatMessage} from './chat-message.model';
 
-export interface OutputMessage extends Message {
+export interface OutputMessage extends ChatMessage {
   time: number;
 }

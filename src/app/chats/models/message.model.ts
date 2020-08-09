@@ -1,4 +1,4 @@
 export interface Message {
-  from: string;
-  text: string;
+  messageType: string;
+  payload: any;
 }
