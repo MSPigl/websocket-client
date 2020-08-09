@@ -27,6 +27,10 @@
         <p>There are no messages in this chat yet.</p>
       </ng-template>
     </ng-container>
-    <p *ngIf="showTypingIndicator"><strong>{{currentUser}}</strong> is typing...</p>
+    <ng-container *ngIf="typingUsers$ | async as typingUsers">
+      <ng-container *ngIf="typingUsers.length">
+        <p>{{typingUsersMessage$ | async}}</p>
+      </ng-container>
+    </ng-container>
   </div>
 </div>
