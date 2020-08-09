@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {OutputMessage} from '../models/output-message.model';
 import {ChatMessage} from '../models/chat-message.model';
 import {webSocket} from 'rxjs/webSocket';
 import {Message} from '../models/message.model';
@@ -28,12 +27,12 @@ export class ChatService {
 
   private _connected = new BehaviorSubject(false);
 
-  private _messages = new BehaviorSubject<Array<OutputMessage>>(null);
+  private _messages = new BehaviorSubject<Array<ChatMessage>>(null);
 
   constructor() { }
 
   sendChatMessage(message: ChatMessage): void {
-    this.sendMessage('chat-message', message);
+    this.sendMessage(MessageType.CHAT_MESSAGE, message);
   }
 
   private sendMessage(messageType: string, payload: any): void {
@@ -76,7 +75,7 @@ export class ChatService {
     return this._connected.asObservable();
   }
 
-  getMessages(): Observable<Array<OutputMessage>> {
+  getMessages(): Observable<Array<ChatMessage>> {
     return this._messages.asObservable();
   }
 }

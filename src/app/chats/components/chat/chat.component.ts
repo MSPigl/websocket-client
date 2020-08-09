@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {OutputMessage} from '../../models/output-message.model';
 import {ChatService} from '../../services/chat.service';
 import {Subject, Observable, Subscription} from 'rxjs';
-import {debounceTime, map, tap} from 'rxjs/operators';
+import {debounceTime, tap} from 'rxjs/operators';
+import {ChatMessage} from '../../models/chat-message.model';
 
 @Component({
   selector: 'app-chat',
@@ -13,7 +13,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   readonly isConnected$: Observable<boolean> = this.chatService.isConnected();
 
-  readonly messages$: Observable<Array<OutputMessage>> = this.chatService.getMessages();
+  readonly messages$: Observable<Array<ChatMessage>> = this.chatService.getMessages();
 
   readonly _typingIndicator = new Subject<void>();
 
