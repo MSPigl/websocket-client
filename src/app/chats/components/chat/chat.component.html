@@ -15,7 +15,7 @@
   <br />
   <div id="conversationDiv" *ngIf="isConnected$ | async">
     <label for="text"></label>
-    <input [(ngModel)]="messageText" type="text" id="text" placeholder="Write a message..."/>
+    <input [(ngModel)]="messageText" (input)="_typingIndicator.next()" type="text" id="text" placeholder="Write a message..."/>
     <button id="sendMessage" (click)="sendMessage()" [disabled]="!messageText?.length">Send</button>
     <ng-container *ngIf="messages$ | async as messages">
       <ng-container *ngIf="messages.length else noMessages">
@@ -27,5 +27,6 @@
         <p>There are no messages in this chat yet.</p>
       </ng-template>
     </ng-container>
+    <p *ngIf="showTypingIndicator"><strong>{{currentUser}}</strong> is typing...</p>
   </div>
 </div>
