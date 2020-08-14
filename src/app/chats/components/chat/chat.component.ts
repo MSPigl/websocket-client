@@ -1,9 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ChatService} from '../../services/chat.service';
-import {Subject, Observable, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, map, shareReplay, tap} from 'rxjs/operators';
+import {Subject, Observable, Subscription, combineLatest} from 'rxjs';
+import {debounceTime, map, pluck, shareReplay, tap} from 'rxjs/operators';
 import {ChatMessage} from '../../models/chat-message.model';
 import {User} from '../../models/user.model';
+import {Chat} from '../../models/chat.model';
 
 @Component({
   selector: 'app-chat',
@@ -24,9 +25,13 @@ export class ChatComponent implements OnDestroy, OnInit {
     shareReplay()
   );
 
-  readonly messages$: Observable<Array<ChatMessage>> = this.chatService.getMessages();
+  readonly chat$: Observable<Chat> = this.chatService.getSelectedChat();
 
-  readonly users$: Observable<Array<User>> = this.chatService.getUsers();
+  readonly chatId$: Observable<number> = this.chat$.pipe(pluck('chatId'));
+
+  readonly messages$: Observable<Array<ChatMessage>> = this.chat$.pipe(pluck('messages'));
+
+  readonly users$: Observable<Array<User>> = this.chat$.pipe(pluck('users'));
 
   readonly typingUsers$: Observable<Array<User>> = this.users$.pipe(
     map(users => users?.filter(user => user.typing && (user.name !== this.currentUser)))
@@ -66,10 +71,11 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   ngOnInit(): void {
     this.subscription.add(
-      this._typingIndicator.pipe(
-        tap(() => this.chatService.sendUserTypingStartMessage(this.currentUser)),
+      combineLatest([this.chatId$, this._typingIndicator]).pipe(
+        map(([chatId, ___]) => chatId),
+        tap(chatId => this.chatService.sendUserTypingStartMessage(chatId, this.currentUser)),
         debounceTime(1000)
-      ).subscribe(() => this.chatService.sendUserTypingEndMessage(this.currentUser))
+      ).subscribe(chatId => this.chatService.sendUserTypingEndMessage(chatId, this.currentUser))
     );
   }
 
@@ -88,7 +94,7 @@ export class ChatComponent implements OnDestroy, OnInit {
   }
 
   sendMessage(): void {
-    this.chatService.sendChatMessage({ from: this.currentUser, text: this.messageText });
+    this.chatService.sendChatMessage(0, { from: this.currentUser, text: this.messageText });
     this.messageText = null;
   }
 }
