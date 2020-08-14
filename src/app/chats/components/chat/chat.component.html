@@ -20,7 +20,7 @@
     <ng-container *ngIf="messages$ | async as messages">
       <ng-container *ngIf="messages.length else noMessages">
         <p *ngFor="let message of messages">
-          <strong>{{message.from}}</strong> said: {{message.text}} ({{message.time | date: 'short'}})
+          <strong>{{message.from === currentUser ? 'You' : message.from}}</strong> said: {{message.text}} ({{message.time | date: 'short'}})
         </p>
       </ng-container>
       <ng-template #noMessages>
