@@ -26,7 +26,7 @@ export class ChatListComponent implements OnInit {
             const remainingParticipantCount = chat.users.length - 3;
             participantString += ` and ${remainingParticipantCount} ${remainingParticipantCount > 0 ? 'others' : 'other'}`;
           } else {
-            participantString = chat.users.join(', ');
+            participantString = chat.users.map(user => user.name).join(', ');
           }
         } else {
           participantString = chat.users[0].name;
