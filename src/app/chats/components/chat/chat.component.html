@@ -1,26 +1,13 @@
 <div>
-  <div>
-    <label for="from"></label>
-    <input [(ngModel)]="currentUser" [disabled]="isConnected$ | async"
-      type="text" id="from" placeholder="Choose a nickname"
-    />
-  </div>
   <br />
-  <div>
-    <button id="connect" (click)="connect()" [disabled]="(isConnected$ | async) || !currentUser?.length">Connect</button>
-    <button id="disconnect" (click)="disconnect()" [disabled]="!(isConnected$ | async)">
-      Disconnect
-    </button>
-  </div>
-  <br />
-  <div id="conversationDiv" *ngIf="isConnected$ | async">
+  <div id="conversationDiv">
     <label for="text"></label>
     <input [(ngModel)]="messageText" (input)="_typingIndicator.next()" type="text" id="text" placeholder="Write a message..."/>
     <button id="sendMessage" (click)="sendMessage()" [disabled]="!messageText?.length">Send</button>
     <ng-container *ngIf="messages$ | async as messages">
       <ng-container *ngIf="messages.length else noMessages">
         <p *ngFor="let message of messages">
-          <strong>{{message.from === currentUser ? 'You' : message.from}}</strong> said: {{message.text}} ({{message.time | date: 'short'}})
+          <strong>{{message.from === (currentUser$ | async) ? 'You' : message.from}}</strong> said: {{message.text}} ({{message.time | date: 'short'}})
         </p>
       </ng-container>
       <ng-template #noMessages>

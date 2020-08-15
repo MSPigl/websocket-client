@@ -35,11 +35,11 @@ export class ChatService {
 
   private readonly _connected = new BehaviorSubject<{ isConnected: boolean, sendMessage: boolean }>(null);
 
+  private readonly _currentUser = new BehaviorSubject<string>(null);
+
   private readonly _chats = new BehaviorSubject<Array<Chat>>(null);
 
   private readonly _selectedChat = new BehaviorSubject<Chat>(null);
-
-  private readonly _messages = new BehaviorSubject<Array<ChatMessage>>(null);
 
   private readonly _users = new BehaviorSubject<Array<User>>(null);
 
@@ -65,6 +65,18 @@ export class ChatService {
     this.sendMessage(MessageType.CHAT_MESSAGE, { chatId, message });
   }
 
+  sendUserCreatedChatMessage(name: string): void {
+    this.sendMessage(MessageType.CHAT_CREATED, { name });
+  }
+
+  sendUserJoinChatMessage(chatId: number, name: string): void {
+    this.sendMessage(MessageType.USER_JOINED_CHAT, { chatId, name });
+  }
+
+  sendUserLeftChatMessage(chatId: number, name: string): void {
+    this.sendMessage(MessageType.USER_LEFT_CHAT, { chatId, name });
+  }
+
   private sendMessage(messageType: string, payload: any): void {
     this._connection.next({
       messageType,
@@ -80,7 +92,7 @@ export class ChatService {
         if (!!receivedMessage.messageType && !!receivedMessage.payload) {
           switch (receivedMessage.messageType) {
             case MessageType.CONNECTION:
-              this._messages.next(receivedMessage.payload);
+              this._chats.next(receivedMessage.payload);
               break;
             case MessageType.USER_CONNECTED:
             case MessageType.USER_DISCONNECTED:
@@ -119,7 +131,7 @@ export class ChatService {
   }
 
   disconnect(): void {
-    this._messages.next(null);
+    this._chats.next(null);
     this._connection.complete();
   }
 
@@ -127,8 +139,8 @@ export class ChatService {
     return this._connected.asObservable();
   }
 
-  getMessages(): Observable<Array<ChatMessage>> {
-    return this._messages.asObservable();
+  getCurrentUser(): Observable<string> {
+    return this._currentUser.asObservable();
   }
 
   getUsers(): Observable<Array<User>> {
@@ -141,5 +153,14 @@ export class ChatService {
 
   getSelectedChat(): Observable<Chat> {
     return this._selectedChat.asObservable();
+  }
+
+  selectChat(chatId: number): void {
+    const chats = this._chats.getValue();
+    const foundChat = chats.find(chat => chat.chatId === chatId);
+
+    if (!!foundChat) {
+      this._selectedChat.next(foundChat);
+    }
   }
 }

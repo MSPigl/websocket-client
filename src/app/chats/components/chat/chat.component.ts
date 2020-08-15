@@ -5,6 +5,7 @@ import {debounceTime, map, pluck, shareReplay, tap} from 'rxjs/operators';
 import {ChatMessage} from '../../models/chat-message.model';
 import {User} from '../../models/user.model';
 import {Chat} from '../../models/chat.model';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -13,17 +14,7 @@ import {Chat} from '../../models/chat.model';
 })
 export class ChatComponent implements OnDestroy, OnInit {
 
-  readonly isConnected$: Observable<boolean> = this.chatService.isConnected().pipe(
-    tap(connectionStatus => {
-      if (!!connectionStatus) {
-        connectionStatus.isConnected
-          ? this.chatService.sendUserConnectionMessage(this.currentUser)
-          : this.chatService.sendUserDisconnectionMessage(this.currentUser);
-      }
-    }),
-    map(connectionStatus => connectionStatus?.isConnected),
-    shareReplay()
-  );
+  readonly currentUser$: Observable<string> = this.chatService.getCurrentUser().pipe(shareReplay());
 
   readonly chat$: Observable<Chat> = this.chatService.getSelectedChat();
 
@@ -67,9 +58,21 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   private subscription = new Subscription();
 
-  constructor(private chatService: ChatService) { }
+  constructor(private chatService: ChatService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
+    this.subscription.add(
+      this.route.params.subscribe(
+        params => {
+          const chatId = +params?.chatId;
+
+          if (chatId >= 1) {
+            this.chatService.selectChat(chatId);
+          }
+        }
+      )
+    );
+
     this.subscription.add(
       combineLatest([this.chatId$, this._typingIndicator]).pipe(
         map(([chatId, ___]) => chatId),

@@ -1,0 +1,17 @@
+<div>
+  <label for="from"></label>
+  <input [(ngModel)]="currentUser" [disabled]="isConnected$ | async"
+         type="text" id="from" placeholder="Choose a nickname"
+  />
+</div>
+<br />
+<div>
+  <button id="connect" (click)="connect()" [disabled]="(isConnected$ | async) || !currentUser?.length">Connect</button>
+  <button id="disconnect" (click)="disconnect()" [disabled]="!(isConnected$ | async)">
+    Disconnect
+  </button>
+</div>
+<div *ngIf="isConnected$ | async">
+  <p>You are connected to the server.</p>
+  <a [routerLink]="['/chats']">See available chats</a>
+</div>

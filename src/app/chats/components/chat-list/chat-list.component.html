@@ -1,0 +1,20 @@
+<ng-container *ngIf="currentUser$ | async as currentUser">
+  <ng-container *ngIf="chats$ | async as chats">
+    <ng-container *ngIf="chats.length">
+      <ng-container *ngIf="chatParticipantListMap$ | async as participantListMap">
+        <div *ngFor="let chat of chats">
+          <div>Participants: {{participantListMap[chat.chatId]}}</div>
+          <ng-container>
+            <a *ngIf="(currentUserChatMembershipMap$ | async)[chat.chatId]" [routerLink]="['/chat', chat.chatId]">View Chat</a>
+            <button (click)="leaveChat(chat.chatId, currentUser)">Leave Chat</button>
+          </ng-container>
+          <button *ngIf="!(currentUserChatMembershipMap$ | async)[chat.chatId]" (click)="joinChat(chat.chatId, currentUser)">Join Chat</button>
+        </div>
+      </ng-container>
+    </ng-container>
+    <ng-container *ngIf="!chats.length">
+      <div>There are no chats yet.</div>
+    </ng-container>
+    <button (click)="createChat(currentUser)">Start Chat</button>
+  </ng-container>
+</ng-container>
