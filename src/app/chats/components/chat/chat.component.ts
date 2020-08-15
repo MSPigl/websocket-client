@@ -24,8 +24,8 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   readonly users$: Observable<Array<User>> = this.chat$.pipe(pluck('users'));
 
-  readonly typingUsers$: Observable<Array<User>> = this.users$.pipe(
-    map(users => users?.filter(user => user.typing && (user.name !== this.currentUser)))
+  readonly typingUsers$: Observable<Array<User>> = combineLatest([this.currentUser$, this.users$]).pipe(
+    map(([currentUser, users]) => users?.filter(user => user.typing && (user.name !== currentUser)))
   );
 
   readonly typingUsersMessage$: Observable<string> = this.typingUsers$.pipe(
@@ -52,16 +52,14 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   readonly _typingIndicator = new Subject<void>();
 
-  currentUser: string;
-
   messageText: string;
 
-  private subscription = new Subscription();
+  private subscriptions = new Subscription();
 
   constructor(private chatService: ChatService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.subscription.add(
+    this.subscriptions.add(
       this.route.params.subscribe(
         params => {
           const chatId = +params?.chatId;
@@ -73,31 +71,23 @@ export class ChatComponent implements OnDestroy, OnInit {
       )
     );
 
-    this.subscription.add(
-      combineLatest([this.chatId$, this._typingIndicator]).pipe(
-        map(([chatId, ___]) => chatId),
-        tap(chatId => this.chatService.sendUserTypingStartMessage(chatId, this.currentUser)),
+    this.subscriptions.add(
+      combineLatest([this.chatId$, this._typingIndicator, this.currentUser$]).pipe(
+        map(([chatId, ___, currentUser]) => {
+          return { chatId, currentUser};
+        }),
+        tap(obj => this.chatService.sendUserTypingStartMessage(obj.chatId, obj.currentUser)),
         debounceTime(1000)
-      ).subscribe(chatId => this.chatService.sendUserTypingEndMessage(chatId, this.currentUser))
+      ).subscribe(obj => this.chatService.sendUserTypingEndMessage(obj.chatId, obj.currentUser))
     );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 
-  connect(): void {
-    this.chatService.connect();
-  }
-
-  disconnect(): void {
-    this.currentUser = null;
-    this.messageText = null;
-    this.chatService.disconnect();
-  }
-
-  sendMessage(): void {
-    this.chatService.sendChatMessage(0, { from: this.currentUser, text: this.messageText });
+  sendMessage(chatId: number, currentUser: string): void {
+    this.chatService.sendChatMessage(chatId, { from: currentUser, text: this.messageText });
     this.messageText = null;
   }
 }

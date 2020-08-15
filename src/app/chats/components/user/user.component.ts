@@ -29,6 +29,7 @@ export class UserComponent implements OnInit {
   ngOnInit(): void { }
 
   connect(): void {
+    this.chatService.setCurrentUser(this.currentUser);
     this.chatService.connect();
   }
 

@@ -66,7 +66,7 @@ export class ChatService {
   }
 
   sendUserCreatedChatMessage(name: string): void {
-    this.sendMessage(MessageType.CHAT_CREATED, { name });
+    this.sendMessage(MessageType.CHAT_CREATED, name);
   }
 
   sendUserJoinChatMessage(chatId: number, name: string): void {
@@ -96,7 +96,11 @@ export class ChatService {
               break;
             case MessageType.USER_CONNECTED:
             case MessageType.USER_DISCONNECTED:
-              this._users.next(receivedMessage.payload);
+              const { users, chatsInServer } = receivedMessage.payload;
+              if (!!users && !!chatsInServer) {
+                this._users.next(users);
+                this._chats.next(chatsInServer);
+              }
               break;
             case MessageType.CHAT_CREATED:
             case MessageType.USER_JOINED_CHAT:
@@ -141,6 +145,10 @@ export class ChatService {
 
   getCurrentUser(): Observable<string> {
     return this._currentUser.asObservable();
+  }
+
+  setCurrentUser(name: string): void {
+    this._currentUser.next(name);
   }
 
   getUsers(): Observable<Array<User>> {

@@ -1,9 +1,9 @@
-<div>
+<div *ngIf="currentUser$ | async as currentUser">
   <br />
-  <div id="conversationDiv">
+  <div id="conversationDiv" *ngIf="chatId$ | async as chatId">
     <label for="text"></label>
     <input [(ngModel)]="messageText" (input)="_typingIndicator.next()" type="text" id="text" placeholder="Write a message..."/>
-    <button id="sendMessage" (click)="sendMessage()" [disabled]="!messageText?.length">Send</button>
+    <button id="sendMessage" (click)="sendMessage(chatId, currentUser)" [disabled]="!messageText?.length">Send</button>
     <ng-container *ngIf="messages$ | async as messages">
       <ng-container *ngIf="messages.length else noMessages">
         <p *ngFor="let message of messages">

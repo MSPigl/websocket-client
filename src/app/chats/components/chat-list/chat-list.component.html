@@ -4,8 +4,8 @@
       <ng-container *ngIf="chatParticipantListMap$ | async as participantListMap">
         <div *ngFor="let chat of chats">
           <div>Participants: {{participantListMap[chat.chatId]}}</div>
-          <ng-container>
-            <a *ngIf="(currentUserChatMembershipMap$ | async)[chat.chatId]" [routerLink]="['/chat', chat.chatId]">View Chat</a>
+          <ng-container *ngIf="(currentUserChatMembershipMap$ | async)[chat.chatId]">
+            <a [routerLink]="['/chats', chat.chatId]">View Chat</a>
             <button (click)="leaveChat(chat.chatId, currentUser)">Leave Chat</button>
           </ng-container>
           <button *ngIf="!(currentUserChatMembershipMap$ | async)[chat.chatId]" (click)="joinChat(chat.chatId, currentUser)">Join Chat</button>
