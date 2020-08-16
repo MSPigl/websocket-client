@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ChatService} from '../../services/chat.service';
 import {Subject, Observable, Subscription, combineLatest} from 'rxjs';
-import {debounceTime, map, pluck, shareReplay, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, map, pluck, shareReplay, tap} from 'rxjs/operators';
 import {ChatMessage} from '../../models/chat-message.model';
 import {User} from '../../models/user.model';
 import {Chat} from '../../models/chat.model';
@@ -18,7 +18,7 @@ export class ChatComponent implements OnDestroy, OnInit {
 
   readonly chat$: Observable<Chat> = this.chatService.getSelectedChat();
 
-  readonly chatId$: Observable<number> = this.chat$.pipe(pluck('chatId'));
+  readonly chatId$: Observable<number> = this.chat$.pipe(pluck('chatId'), distinctUntilChanged());
 
   readonly messages$: Observable<Array<ChatMessage>> = this.chat$.pipe(pluck('messages'));
 

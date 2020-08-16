@@ -89,6 +89,8 @@ export class ChatService {
     this._connection.subscribe(
       message => {
         const receivedMessage: Message = message as Message;
+        let chats: Array<Chat>;
+        let users: Array<User>;
 
         if (!!receivedMessage.messageType && !!receivedMessage.payload) {
           switch (receivedMessage.messageType) {
@@ -97,10 +99,11 @@ export class ChatService {
               break;
             case MessageType.USER_CONNECTED:
             case MessageType.USER_DISCONNECTED:
-              const { users, chatsInServer } = receivedMessage.payload;
-              if (!!users && !!chatsInServer) {
+              chats = receivedMessage.payload.chats;
+              users = receivedMessage.payload.users;
+              if (!!users && !!chats) {
                 this._users.next(users);
-                this._chats.next(chatsInServer);
+                this._chats.next(chats);
               }
               break;
             case MessageType.CHAT_CREATED:
@@ -110,10 +113,26 @@ export class ChatService {
               break;
             case MessageType.USER_TYPING_START:
             case MessageType.USER_TYPING_END:
-              this._users.next(receivedMessage.payload);
+              const chatId = receivedMessage.payload.chatId;
+              users = receivedMessage.payload.users;
+              if (chatId >= 1 && !!users) {
+                chats = this._chats.getValue();
+                const foundChat = chats.find(chat => chat.chatId === chatId);
+
+                if (!!foundChat) {
+                  foundChat.users = users;
+                  this._chats.next(chats);
+
+                  const selectedChat = this._selectedChat.getValue();
+                  if (chatId === selectedChat?.chatId) {
+                    this._selectedChat.next(foundChat);
+                  }
+                }
+              }
+
               break;
             case MessageType.CHAT_MESSAGE:
-              const chats = this._chats.getValue();
+              chats = this._chats.getValue();
               const foundChatIndex = chats.findIndex(chat => chat.chatId === receivedMessage.payload.chatId);
 
               if (foundChatIndex >= 0) {
