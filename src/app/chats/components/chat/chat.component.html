@@ -1,4 +1,5 @@
 <div *ngIf="currentUser$ | async as currentUser">
+  <a [routerLink]="['/chats']">Back to Chats</a>
   <br />
   <div id="conversationDiv" *ngIf="chatId$ | async as chatId">
     <label for="text"></label>

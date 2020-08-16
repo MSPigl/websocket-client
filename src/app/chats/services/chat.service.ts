@@ -6,7 +6,7 @@ import {Message} from '../models/message.model';
 import {User} from '../models/user.model';
 import {Chat} from '../models/chat.model';
 
-// TODO: fix typing indicators
+// TODO: add unread notifications, global connection handler
 enum MessageType {
   CONNECTION = 'connection',
   USER_CONNECTED = 'user-connected',
